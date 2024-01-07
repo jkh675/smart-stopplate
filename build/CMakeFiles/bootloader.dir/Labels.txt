@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+G:/Project/Coding/Hardware/stopplate_refact/build/CMakeFiles/bootloader
+G:/Project/Coding/Hardware/stopplate_refact/build/CMakeFiles/bootloader.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/CMakeFiles/bootloader-complete.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+G:/Project/Coding/Hardware/stopplate_refact/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

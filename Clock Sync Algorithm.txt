@@ -1,0 +1,24 @@
+stage init:
+ESP    T1: 10:00:00
+PHONE  00:00:00
+stage reply:
+ESP    10:00:01 Tm: 00:00:01
+PHONE  00:00:01
+
+stage receive:
+ESP    T2: 10:00:02 Tm: 00:00:01
+PHONE  00:00:02
+
+
+Tm+(T2-T1)/2 
+=(00:00:01)+(((10:00:02)-(10:00:00))/2)
+=00:00:02
+=T2
+in ideal situation
+
+One method I found, called the Cristian synchronization algorithm, is implemented as follows:
+
+The slave sends a Time Synchronization Request, at time T1.
+The master receives this request, and sends its Clock Time Tm to the slave
+When the slave receives the master clock time, at time T2, it sets its own clock to time Tm + (T2-T1)/2
+ref : https://devzone.nordicsemi.com/f/nordic-q-a/97532/ble-time-synchronization-between-devices

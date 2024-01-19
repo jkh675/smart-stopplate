@@ -47,6 +47,7 @@
 
 Preferences stopplate_preferences_store;
 #define MAX_CLOCK_SYNC_RETRY_TIME 50
+#define TIME_BETWEEN_HIT 0.05
 
 /* #region DEBUG TAG BLOCK */
 static const char *MIC_DEBUG_TAG = "Mic Sensor";
@@ -169,7 +170,8 @@ class startSignalCallbacks : public BLECharacteristicCallbacks
 int clock_sync_retry_count;
 void notify_perform_clock_sync()
 {
-    if (clock_sync_retry_count > MAX_CLOCK_SYNC_RETRY_TIME) {
+    if (clock_sync_retry_count > MAX_CLOCK_SYNC_RETRY_TIME)
+    {
         return;
     }
     clock_sync_retry_count++;
@@ -194,7 +196,7 @@ class timeSyncWriteCallbacks : public BLECharacteristicCallbacks
         double time_received = std::stod(pCharacteristic->getValue());
         double time_end = get_time();
         double time_interval = time_end - time_init;
-        double time_final = (time_received) + ((time_interval) /2) /* /2 divide by 2 is essential for cristian clock syncronize alg. but idk why it will decrease the accuracy. */;
+        double time_final = (time_received) + ((time_interval) / 2) /* /2 divide by 2 is essential for cristian clock syncronize alg. but idk why it will decrease the accuracy. */;
         set_time_double(time_final);
         double error = std::fabs(get_time() - time_final);
         ESP_LOGI(CLOCK_DEBUG_TAG, "time sync reply with: %s", std::to_string(time_received).c_str());
@@ -444,16 +446,23 @@ extern "C" void app_main()
     }
 }
 
+double previous_hit = 0;
+
 void esp_loop(void)
 {
     int analog_mic_val = adc1_get_raw(ANALOG_MIC);
     int digital_mic_val = adc1_get_raw(DIGITAL_MIC);
     if (analog_mic_val >= 1200)
     {
-        ESP_LOGI(MIC_DEBUG_TAG, "Triggered");
-        ESP_LOGI(MIC_DEBUG_TAG, "analog_mic_val: %i, digital_mic_val: %i,", analog_mic_val, digital_mic_val);
-        toggle_led();
-        notify_ble();
+        if (get_time() - previous_hit >= TIME_BETWEEN_HIT)
+        {
+
+            ESP_LOGI(MIC_DEBUG_TAG, "Triggered");
+            ESP_LOGI(MIC_DEBUG_TAG, "analog_mic_val: %i, digital_mic_val: %i,", analog_mic_val, digital_mic_val);
+            toggle_led();
+            notify_ble();
+            previous_hit = get_time();
+        }
     }
 
     vTaskDelay(10);

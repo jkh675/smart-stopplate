@@ -193,26 +193,31 @@ class timeSyncWriteCallbacks : public BLECharacteristicCallbacks
 {
     void onWrite(BLECharacteristic *pCharacteristic)
     {
-        double time_received = std::stod(pCharacteristic->getValue());
-        double time_end = get_time();
-        double time_interval = time_end - time_init;
-        double time_final = (time_received) + ((time_interval) / 2) /* /2 divide by 2 is essential for cristian clock syncronize alg. but idk why it will decrease the accuracy. */;
-        set_time_double(time_final);
-        double error = std::fabs(get_time() - time_final);
-        ESP_LOGI(CLOCK_DEBUG_TAG, "time sync reply with: %s", std::to_string(time_received).c_str());
-        ESP_LOGI(CLOCK_DEBUG_TAG, "time_start: %s", std::to_string(time_init).c_str());
-        ESP_LOGI(CLOCK_DEBUG_TAG, "time_end: %s", std::to_string(time_end).c_str());
-        ESP_LOGI(CLOCK_DEBUG_TAG, "time_interval: %s", std::to_string(time_interval).c_str());
-        ESP_LOGI(CLOCK_DEBUG_TAG, "time_received: %s", std::to_string(time_received).c_str());
-        ESP_LOGI(CLOCK_DEBUG_TAG, "time_final: %s", std::to_string(time_final).c_str());
-        ESP_LOGI(CLOCK_DEBUG_TAG, "error: %s", std::to_string(error).c_str());
-        ESP_LOGI(BLE_GATT_DEBUG_TAG, "time sync write value raw: %s", pCharacteristic->getData());
-        ESP_LOGI(BLE_GATT_DEBUG_TAG, "time sync write value: %s", pCharacteristic->getValue().c_str());
-        if (error > 0.1 && clock_sync_retry_count < MAX_CLOCK_SYNC_RETRY_TIME)
-        {
-            ESP_LOGI(CLOCK_DEBUG_TAG, "retry count: %d", clock_sync_retry_count);
-            // retry until error < 0.1
-            notify_perform_clock_sync();
+        try {
+            double time_received = std::stod(pCharacteristic->getValue());
+            double time_end = get_time();
+            double time_interval = time_end - time_init;
+            double time_final = (time_received) + ((time_interval) / 2) /* /2 divide by 2 is essential for cristian clock syncronize alg. but idk why it will decrease the accuracy. */;
+            set_time_double(time_final);
+            double error = std::fabs(get_time() - time_final);
+            ESP_LOGI(CLOCK_DEBUG_TAG, "time sync reply with: %s", std::to_string(time_received).c_str());
+            ESP_LOGI(CLOCK_DEBUG_TAG, "time_start: %s", std::to_string(time_init).c_str());
+            ESP_LOGI(CLOCK_DEBUG_TAG, "time_end: %s", std::to_string(time_end).c_str());
+            ESP_LOGI(CLOCK_DEBUG_TAG, "time_interval: %s", std::to_string(time_interval).c_str());
+            ESP_LOGI(CLOCK_DEBUG_TAG, "time_received: %s", std::to_string(time_received).c_str());
+            ESP_LOGI(CLOCK_DEBUG_TAG, "time_final: %s", std::to_string(time_final).c_str());
+            ESP_LOGI(CLOCK_DEBUG_TAG, "error: %s", std::to_string(error).c_str());
+            ESP_LOGI(BLE_GATT_DEBUG_TAG, "time sync write value raw: %s", pCharacteristic->getData());
+            ESP_LOGI(BLE_GATT_DEBUG_TAG, "time sync write value: %s", pCharacteristic->getValue().c_str());
+            if (error > 0.1 && clock_sync_retry_count < MAX_CLOCK_SYNC_RETRY_TIME)
+            {
+                ESP_LOGI(CLOCK_DEBUG_TAG, "retry count: %d", clock_sync_retry_count);
+                // retry until error < 0.1
+                notify_perform_clock_sync();
+            }
+        } catch (std::exception &e) {
+            ESP_LOGI(CLOCK_DEBUG_TAG, "time sync write value error: %s", e.what());
+            return;
         }
     }
 };
@@ -303,6 +308,7 @@ void init_characteristic()
     timeSyncWriteCharacteristic = pService->createCharacteristic(
         TIME_SYNC_WRITE_CHARACTERISTIC_UUID,
         BLECharacteristic::PROPERTY_WRITE |
+            BLECharacteristic::PROPERTY_WRITE_NR |
             BLECharacteristic::PROPERTY_NOTIFY |
             BLECharacteristic::PROPERTY_READ);
     timeSyncWriteCharacteristic->setCallbacks(new timeSyncWriteCallbacks());
